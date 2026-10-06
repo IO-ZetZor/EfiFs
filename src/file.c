@@ -24,6 +24,7 @@
  */
 
 #include "driver.h"
+#include "diskcache.h"
 
 /**
  * Get EFI file name (for debugging)
@@ -220,6 +221,13 @@ FileOpenEx(EFI_FILE_HANDLE This, EFI_FILE_HANDLE *New, CHAR16 *Name,
 static EFI_STATUS EFIAPI
 FileClose(EFI_FILE_HANDLE This)
 {
+#ifdef DISKCACHE_STATS
+	{
+		extern VOID DiskCachePrintStats(VOID);
+		static int Printed = 0;
+		if (!Printed) { Printed = 1; DiskCachePrintStats(); }
+	}
+#endif
 	EFI_GRUB_FILE *File = _CR(This, EFI_GRUB_FILE, EfiFile);
 
 	PrintInfo(L"Close(" PERCENT_P L"|'%s') %s\n", (UINTN) This, FileName(File),
